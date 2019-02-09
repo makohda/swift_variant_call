@@ -1,5 +1,35 @@
 # swift_variant_call
 
+## Running example shell scripts#1
+swift_amplicon.single_sample.sh is for single sample processing.
+You will specify your sample name in the script.
+If you had Accel-Amplicon_TP53_acrometrix_1.fastq.gz and Accel-Amplicon_TP53_acrometrix_2.fastq.gz, you will write your sample name like this.
+```
+id=Accel-Amplicon_TP53_acrometrix
+```
+You can find this description at line 13 in swift_amplicon.single_sample.sh.
+
+Run this script, you just type
+```
+./swift_amplicon.single_sample.sh
+```
+
+## Running example shell scripts#2
+swift_amplicon.multi_sample.sh is for multiple sample processing.
+You **don't** specify your sample names in the script.
+
+This script automatically collect your *_1.fastq.gz and generate each samle name.
+
+So, you always set your file name as **_1.fastq.gz**
+
+**DO NOT USE** _**R**1.fastq.gz or _1.**fq**.gz in your file names.
+
+Run this script, you just type
+```
+./swift_amplicon.multi_sample.sh
+```
+
+
 ## Install programs using homebrew
 ```
 $ brew install samtools
@@ -18,7 +48,7 @@ Download IGV to run on Linux / MacOS command line
 
 - swiftbiosciences/primerclip: Swift Accel-Amplicon primer trimming tool for fast alignment-based primer trimming https://github.com/swiftbiosciences/primerclip
 
-Primerclip is needed to trim (softclip) Swift-generated primer sequneces from your mapped sequene files (.sam).
+## Primerclip is needed to trim (softclip) Swift-generated primer sequneces from your mapped sequene files (.sam).
 Sample code is like this.
 
 Make a .sam files from fastq reads.
