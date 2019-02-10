@@ -157,6 +157,9 @@ done
 ls -1 *_raw_variants.g.vcf | perl -ne 's/(.*)_raw_variants.g.vcf/$1/; print "$1\t$1_raw_variants.g.vcf\n"' > gatk.sample_map
 cat gatk.sample_map
 
+if [ -e ./genomicsdb ]; then
+  mv genomicsdb genomicsdb.`date "+%Y%m%d_%H%M%S"`
+fi
 # GenomicDBImport start
 ./gatk-4.1.0.0/gatk --java-options "-Xmx4G -Xms4G" GenomicsDBImport \
                     --batch-size 50 \
@@ -274,4 +277,35 @@ grep -wF -e Func.refGeneWithVer -e exonic -e splicing ${id}.avoutput2.hg19_multi
 #cat ${id}.avoutput2.hg19_multianno.exonic.txt | perl -F"\t" -lane 'print $_ if $F[11] <= 0.0001 || $. == 1' > ${id}.avoutput2.hg19_multianno.exonic.filtered_1.txt
 #cat ${id}.avoutput2.hg19_multianno.exonic.txt | perl -F"\t" -lane 'print $_ if $. == 1 || ($F[11] <= 0.0001 && $F[14] <= 0.0001)' | grep -wF -e Chr -e hom | grep -vwF LowDP > ${id}.avoutput2.hg19_multianno.exonic.filtered_2.txt
 
+# file move/remove
+if [ ! -e ./fastq_paired_unpaired ]; then
+  mkdir fastq_paired_unpaired
+fi
+mv *paired.fastq.gz fastq_paired_unpaired/
+
+if [ ! -e ./bam_dir ]; then
+  mkdir bam_dir
+fi
+mv *.bam *.bai bam_dir/
+rm *.sam
+
+if [ ! -e ./trimlog_dir ]; then
+  mkdir trimlog_dir
+fi
+mv *.trimlog trimlog_dir/
+
+if [ ! -e ./gvcf_dir ]; then
+  mkdir gvcf_dir
+fi
+mv *.g.vcf *.g.vcf.idx gvcf_dir/
+
+if [ ! -e ./vcf_dir ]; then
+  mkdir vcf_dir
+fi
+mv combined_genotyped*.vcf combined_genotyped*.vcf.idx vcf_dir/
+
+if [ ! -e ./log_dir ]; then
+  mkdir log_dir
+fi
+mv *primerclip_runstats.log *.trimlog *_recal.table masterparsefails.log log_dir/
 echo "Finish!"
