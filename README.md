@@ -1,6 +1,6 @@
 # swift_variant_call
 
-## Running example shell scripts#1
+## Running example shell scripts#1 (single sample)
 swift_amplicon.single_sample.sh is for single sample processing.
 You will specify your sample name in the script.
 If you had Accel-Amplicon_TP53_acrometrix_1.fastq.gz and Accel-Amplicon_TP53_acrometrix_2.fastq.gz, you will write your sample name like this.
@@ -14,7 +14,7 @@ Run this script, you just type
 ./swift_amplicon.single_sample.sh
 ```
 
-## Running example shell scripts#2
+## Running example shell scripts#2 (multiple samples)
 swift_amplicon.multi_sample.sh is for multiple sample processing.
 You **don't** specify your sample names in the script.
 
@@ -29,14 +29,26 @@ Run this script, you just type
 ./swift_amplicon.multi_sample.sh
 ```
 
+----
+
+# Preparations, notes
+Assuming to use recent macOS
+Version information of programs are:
+FastQC: v0.11.7
+Trimmomatic: 0.38
+bwa: 0.7.17-r1188
+samtools 1.9
+Using htslib 1.9
+picard: 2.18.23-SNAPSHOT
+The Genome Analysis Toolkit (GATK): v4.1.0.0
+Annovar: $Date: 2018-04-16 00:47:49 -0400 (Mon, 16 Apr 2018) $
 
 ## Install programs using homebrew
 ```
-$ brew install samtools
-$ brew install picard-tools
-$ brew install cutadapt
 $ brew install bwa
 $ brew install fastqc
+$ brew install picard-tools
+$ brew install samtools
 ```
 
 ## Install by downloading from web sites
@@ -48,33 +60,12 @@ Download IGV to run on Linux / MacOS command line
 
 - swiftbiosciences/primerclip: Swift Accel-Amplicon primer trimming tool for fast alignment-based primer trimming https://github.com/swiftbiosciences/primerclip
 
-## Primerclip is needed to trim (softclip) Swift-generated primer sequneces from your mapped sequene files (.sam).
-Sample code is like this.
+- GATK | Home https://software.broadinstitute.org/gatk/
 
-Make a .sam files from fastq reads.
-```
-$ bwa mem -t ${thread} -M \
-            -R "@RG\tID:FLOWCELLID\tSM:${id}\tPL:illumina\tLB:${id}_library_1" \
-            human_g1k_v37_decoy.fasta \
-            ${id}_1.fastq.gz ${id}_2.fastq.gz > ${id}.aligned_reads.sam
-```
-Run primerclip using masterfile. Masterfile could be downloaded from Swift web site (require registration).
-```
-$ primerclip Accel-Amplicon_TP53_masterfile_170228.txt ${id}.aligned_reads.sam ${id}.aligned_reads_clipped.sam
-$ samtools view -@4 -1 ${id}.aligned_reads_clipped.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_clipped_sorted.bam
-$ samtools index -@ ${thread} ${id}.aligned_reads_clipped_sorted.bam
-```
-At the same time, generate .bam file from the .sam file without primerclip treatment.
-```
-$ samtools view -@4 -1 ${id}.aligned_reads.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_sorted.bam
-$ samtools index -@ ${thread} ${id}.aligned_reads_sorted.bam
-```
-Compare two .bam files (with, without primerclip processing).
-```
-$ sh IGV_2.4.18/igv.sh ${id}.aligned_reads_sorted.bam ${id}.aligned_reads_clipped_sorted.bam
-```
+- Annovar Download ANNOVAR - ANNOVAR Documentation http://annovar.openbioinformatics.org/en/latest/user-guide/download/
 
-### Installing primercip into macOS is a bit tricky.
+
+### Installing primercip into macOS is a bit tricky
 Firstly, install haskell stack to build primerclip.
 ```
 $ curl -sSL https://get.haskellstack.org/ | sh
@@ -110,6 +101,33 @@ Now, you can compile primerclip.
 $ stack build
 $ stack install
 ```
+
+## Primerclip is needed to trim (softclip) Swift-generated primer sequneces from your mapped sequene files (.sam).
+Sample code is like this.
+
+Make a .sam files from fastq reads.
+```
+$ bwa mem -t ${thread} -M \
+            -R "@RG\tID:FLOWCELLID\tSM:${id}\tPL:illumina\tLB:${id}_library_1" \
+            human_g1k_v37_decoy.fasta \
+            ${id}_1.fastq.gz ${id}_2.fastq.gz > ${id}.aligned_reads.sam
+```
+Run primerclip using masterfile. Masterfile could be downloaded from Swift web site (require registration).
+```
+$ primerclip Accel-Amplicon_TP53_masterfile_170228.txt ${id}.aligned_reads.sam ${id}.aligned_reads_clipped.sam
+$ samtools view -@4 -1 ${id}.aligned_reads_clipped.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_clipped_sorted.bam
+$ samtools index -@ ${thread} ${id}.aligned_reads_clipped_sorted.bam
+```
+At the same time, generate .bam file from the .sam file without primerclip treatment.
+```
+$ samtools view -@4 -1 ${id}.aligned_reads.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_sorted.bam
+$ samtools index -@ ${thread} ${id}.aligned_reads_sorted.bam
+```
+Compare two .bam files (with, without primerclip processing).
+```
+$ sh IGV_2.4.18/igv.sh ${id}.aligned_reads_sorted.bam ${id}.aligned_reads_clipped_sorted.bam
+```
+![IGV_primerclip](../images/primerclip.png)
 
 ## Download COSMIC data files
 Download files from here https://cancer.sanger.ac.uk/cosmic/download?genome=37
