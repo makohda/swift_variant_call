@@ -127,7 +127,7 @@ Compare two .bam files (with, without primerclip processing).
 ```
 $ sh IGV_2.4.18/igv.sh ${id}.aligned_reads_sorted.bam ${id}.aligned_reads_clipped_sorted.bam
 ```
-![IGV_primerclip](https://github.com/makohda/swift_variant_call/blob/images/primerclip.png)
+![IGV_primerclip](https://raw.githubusercontent.com/makohda/swift_variant_call/master/images/primerclip.png)
 
 
 ## Download COSMIC data files
