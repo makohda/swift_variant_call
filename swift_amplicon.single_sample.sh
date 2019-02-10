@@ -17,11 +17,11 @@ thread=4 # 並列に計算出来るときは４並列で計算するためのオ
 echo "version information"
 fastqc --version | perl -pe 's/FastQC/FastQC:/'
 echo "Trimmomatic: `java -Xmx4g -jar Trimmomatic-0.38/trimmomatic-0.38.jar -version`"
-bwa 2>&1 | grep Version
+bwa 2>&1 | grep Version | perl -pe 's/Version/bwa/'
 samtools --version | grep -v Copyright
-picard MergeVcfs 2>&1 | grep Version | perl -pe 's/Version/picard version/'
+picard MergeVcfs 2>&1 | grep Version | perl -pe 's/Version/picard/'
 ./gatk-4.1.0.0/gatk --version 2>&1 | grep Toolkit | perl -pe 's/ v/: v/'
-./annovar/table_annovar.pl -h 2>&1 | grep Version | perl -pe 's/ +Version/Annovar version/'
+./annovar/table_annovar.pl -h 2>&1 | grep Version | perl -pe 's/ +Version/Annovar/'
 ##
 
 date
@@ -140,6 +140,12 @@ date
                     -I ${id}.aligned_reads_clipped_recal_sorted.bam \
                     --dbsnp dbsnp_138.b37.vcf \
                     -ERC GVCF \
+                    -A AlleleFraction \
+                    -A DepthPerAlleleBySample \
+                    -A DepthPerSampleHC \
+                    -G AS_StandardAnnotation \
+                    -G StandardAnnotation \
+                    -G StandardHCAnnotation \
                     -L tp53_170228_merged_targets.bed \
                     -O ${id}_raw_variants.g.vcf
 # HaplotypeCaller https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.0.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php
@@ -239,12 +245,12 @@ date
 
 ./annovar/table_annovar.pl combined_genotyped_filtered_snps_indels_mixed.PASS.${id}.avinput annovar/humandb/ \
                            -buildver hg19 \
-                           -protocol refGeneWithVer,genomicSuperDups,exac03,gnomad_genome,generic,avsnp150,clinvar_20180603,ljb26_all \
+                           -protocol refGeneWithVer,genomicSuperDups,cosmic87_coding,cosmic87_noncoding,clinvar_20180603,generic,exac03,gnomad_genome,avsnp150,ljb26_all \
                            -genericdb tommo-3.5kjpnv2-20180625-af_snvall.MAF.genericdb \
-                           -operation g,r,f,f,f,f,f,f \
+                           -operation g,r,f,f,f,f,f,f,f,f \
                            -nastring NA \
                            --otherinfo \
-                           --argument '--hgvs --exonicsplicing --splicing_threshold 2',,,,,,, \
+                           --argument '--hgvs --exonicsplicing --splicing_threshold 2',,,,,,,,, \
                            --remove \
                            -out ${id}.avoutput2
 
