@@ -1,33 +1,19 @@
 # swift_variant_call
 
-## Running example shell scripts#1 (single sample)
-swift_amplicon.single_sample.sh is for single sample processing.
-You will specify your sample name in the script.
+## Running example shell scripts (single sample analysis using bwa, gatk4, lofreq, and annovar)
+**swift_amplicon.SRA5AF_sample.04.sh** is for single sample processing.
+The script is designed to work with low allele frequency variants (e.g. more than 5% allele frequencies).
+Before running it , YOU will specify your sample name in the script.
 If you had Accel-Amplicon_TP53_acrometrix_1.fastq.gz and Accel-Amplicon_TP53_acrometrix_2.fastq.gz, you will write your sample name like this.
 ```
 id=Accel-Amplicon_TP53_acrometrix
 ```
-You can find this description at line 13 in swift_amplicon.single_sample.sh.
+You can find this description at line 5 in swift_amplicon.SRA5AF_sample.04.sh.
 
 Run this script, you just type
 ```
-./swift_amplicon.single_sample.sh
-```
-
-## Running example shell scripts#2 (multiple samples)
-swift_amplicon.multi_sample.sh is for multiple sample processing.
-You **don't** specify your sample names in the script.
-
-This script automatically collect your *_1.fastq.gz and generate each samle name.
-
-So, you always set your file name as **_1.fastq.gz**
-
-**DO NOT USE** _**R**1.fastq.gz or _1.**fq**.gz in your file names.
-
-Run this script, you just type
-```
-./swift_amplicon.multi_sample.sh
-```
+./swift_amplicon.SRA5AF_sample.04.sh
+``
 
 ----
 
@@ -49,11 +35,13 @@ $ brew install bwa
 $ brew install fastqc
 $ brew install picard-tools
 $ brew install samtools
+$ brew install lofreq
+$ brew install coreutils
+$ brew install grep
 ```
 
-## Install by downloading from web sites
+## Install Trimmomatic, IGV, GATK4, PrimerClip, Annovar
 - Trimmomatic: A flexible read trimming tool for Illumina NGS data http://www.usadellab.org/cms/?page=trimmomatic
-GATK-4.1.0.0 https://software.broadinstitute.org/gatk/download/
 
 - Integrative Genomics Viewer https://software.broadinstitute.org/software/igv/download
 Download IGV to run on Linux / MacOS command line
@@ -84,7 +72,7 @@ $ stack install
 But, I met following error.
 => ld: library not found for -lcrt0.o
 
-I'm not sure, I understood this problem correctly. But this error was caused by macOS.
+If I understood this problem correctly, this error was caused by macOS manner.
 In macOS, we can't compile softwares with -static option.
 Avoiding this compile error, modify the build rule file.
 ```
@@ -145,7 +133,12 @@ After completing downloads, convert these four files to annovar data format.
 ```
 $ prepare_annovar_user.pl -dbtype cosmic CosmicMutantExport.tsv -vcf CosmicCodingMuts.vcf > hg19_cosmic87_coding.txt
 $ prepare_annovar_user.pl -dbtype cosmic CosmicNCV.tsv -vcf CosmicNonCodingVariants.vcf > hg19_cosmic87_noncoding.txt
+Sort by chromosomes and positions.
+$ cat hg19_cosmic87_coding.txt | gsort -V -k1 > hg19_cosmic87_coding_sorted.txt
+$ cat hg19_cosmic87_noncoding.txt | gsort -V -k1 > hg19_cosmic87_noncoding_sorted.txt
 ```
+hg19_cosmic87_coding_sorted.txt and hg19_cosmic87_noncoding_sorted.txt will be located in annovar/humandb/ directory.
+
 You can get more detail information here.
 http://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations
 
@@ -172,6 +165,13 @@ Demonstration Data.
 **Accel-Amplicon_TP53_masterfile_170228.txt will be required for primerclip step.**
 
 **Accel-Amplicon_TP53_merged_targets will be required for GATK processing. It will be used for specifying genomic regions for calcuration.**
+
+Convert .bam to .fastq format, because it could be used as test data to test our pipeline sensitivity.
+```
+$ picard SamToFastq  INPUT=Accel-Amplicon_TP53_acrometrix_IndelRealigned_BQSR.bam F=Accel-Amplicon_TP53_acrometrix_1.fastq F2=Accel-Amplicon_TP53_acrometrix_2.fastq
+$ gzip Accel-Amplicon_TP53_acrometrix_1.fastq
+$ gzip Accel-Amplicon_TP53_acrometrix_2.fastq
+```
 
 ----
 
@@ -206,4 +206,33 @@ $ sh IGV_2.4.18/igv.sh ${id}.aligned_reads_sorted.bam ${id}.aligned_reads_clippe
 ```
 ![IGV_primerclip](https://raw.githubusercontent.com/makohda/swift_variant_call/master/images/primerclip.png)
 
+----
 
+# Deprecated
+## Running example shell scripts#1 (single sample)
+swift_amplicon.single_sample.sh is for single sample processing.
+You will specify your sample name in the script.
+If you had Accel-Amplicon_TP53_acrometrix_1.fastq.gz and Accel-Amplicon_TP53_acrometrix_2.fastq.gz, you will write your sample name like this.
+```
+id=Accel-Amplicon_TP53_acrometrix
+```
+You can find this description at line 13 in swift_amplicon.single_sample.sh.
+
+Run this script, you just type
+```
+./swift_amplicon.single_sample.sh
+```
+
+## Running example shell scripts#2 (multiple samples)
+swift_amplicon.multi_sample.sh is for multiple sample processing.
+You **don't** specify your sample names in the script.
+
+This script automatically collect your *_1.fastq.gz and generate each samle name.
+
+So, you always set your file name as **_1.fastq.gz**
+
+Run this script, you just type
+```
+./swift_amplicon.multi_sample.sh
+```
+**DO NOT USE** _**R**1.fastq.gz or _1.**fq**.gz in your file names.
