@@ -13,7 +13,7 @@ You can find this description at line 5 in swift_amplicon.SRA5AF_sample.04.sh.
 Run this script, you just type
 ```
 ./swift_amplicon.SRA5AF_sample.04.sh
-``
+```
 
 ----
 
