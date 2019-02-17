@@ -19,6 +19,7 @@ Run this script, you just type
 
 # Preparations, notes
 Assuming to use recent macOS
+```
 Version information of programs are:
 FastQC: v0.11.7
 Trimmomatic: 0.38
@@ -27,7 +28,9 @@ samtools 1.9
 Using htslib 1.9
 picard: 2.18.23-SNAPSHOT
 The Genome Analysis Toolkit (GATK): v4.1.0.0
+lofreq: 2.1.3.1
 Annovar: $Date: 2018-04-16 00:47:49 -0400 (Mon, 16 Apr 2018) $
+```
 
 ## Install programs using homebrew
 ```
@@ -192,12 +195,12 @@ $ bwa mem -t ${thread} -M \
 Run primerclip using masterfile. Masterfile could be downloaded from Swift web site (require registration).
 ```
 $ primerclip Accel-Amplicon_TP53_masterfile_170228.txt ${id}.aligned_reads.sam ${id}.aligned_reads_clipped.sam
-$ samtools view -@4 -1 ${id}.aligned_reads_clipped.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_clipped_sorted.bam
+$ samtools view -@ ${thread} -1 ${id}.aligned_reads_clipped.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_clipped_sorted.bam
 $ samtools index -@ ${thread} ${id}.aligned_reads_clipped_sorted.bam
 ```
 At the same time, generate .bam file from the .sam file without primerclip treatment.
 ```
-$ samtools view -@4 -1 ${id}.aligned_reads.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_sorted.bam
+$ samtools view -@ ${thread} -1 ${id}.aligned_reads.sam | samtools sort -@4 - -o - > ${id}.aligned_reads_sorted.bam
 $ samtools index -@ ${thread} ${id}.aligned_reads_sorted.bam
 ```
 Compare two .bam files (with, without primerclip processing).
